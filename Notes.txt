@@ -69,3 +69,17 @@ Enemy AI:
 	*The enemy knows the location of the player
 	*The enemy moves to the closest possible tile
 }
+
+* Player Turn:
+	* Select character	
+	* Movement
+		* Attack	
+		* If all allied characters are inactive
+			* Move to opponents turn
+		* Else return to select character
+
+* Enemy Turn: 
+
+
+* Bugs:
+clicking on yourself after movement/attack crashes the page

@@ -83,13 +83,29 @@ var phase = 'ChooseCharacter'
 
 
 //Can probably move this section directly into the one below later
-var Lucina = new Character($('#lucina'),'Lucina',100,20,10,20,20,4,0,false, false, [0,0])
-var Ryoma = new Character($('#ryoma'),'Ryoma',100,20,10,20,20,4,0,false, false, [1,0])
-var Hector = new Character($('#hector'),'Hector',100,10,20,20,20,4,0,false, false, [2,0])
-var Leona = new Character($('#leona'),'Leona',100,20,10,100,20,4,0,true, true, [3,0])
+var Lucina = new Character($('#lucina'),'Lucina',100,20,10,20,20,3,0,false, false, [0,0])
+var Ryoma = new Character($('#ryoma'),'Ryoma',100,20,10,20,20,3,0,false, false, [1,0])
+var Hector = new Character($('#hector'),'Hector',100,10,20,20,20,3,0,false, false, [2,0])
+var Chamomile = new Character($('#chamomile'),'Chamomile',100,20,10,100,20,3,0,true, true, [3,0])
+var Earl = new Character($('#earl'),'Earl',100,20,10,100,20,3,0,true, true, [4,0])
+var Ceylon = new Character($('#ceylon'),'Ceylon',100,20,10,100,20,3,0,true, true, [5,0])
+
 
 var enemies = [Lucina, Ryoma, Hector]
-var allies = [Leona]
+var allies = [$('chamomile'),$('#earl'),$('#ceylon')]
+
+//Initialize position of allies and store their object reference in the tile
+for (var i = 0; i<enemies.length;i++){
+    enemies[i].ref.data(enemies[i])
+    enemies[i].moveto(i,0)
+}
+
+//Initialize position of allies
+allies.forEach(function(char){
+    char.data(char)
+    char.moveto(char.pos[0],char.pos[1])
+    
+})
 
 var tileweights =  [[[-1,-1],99],[[-1,0],99],[[-1,1],99],[[-1,2],99],[[-1,3],99],[[-1,4],99],[[-1,5],99],[[-1,6],99],[[-1,7],99],[[-1,8],99],[[-1,9],99],[[-1,10],99],
                     [[0,-1],99],[[0,0],1],[[0,1],1],[[0,2],1],[[0,3],1],[[0,4],1],[[0,5],1],[[0,6],1],[[0,7],1],[[0,8],1],[[0,9],1],[[0,10],99],
@@ -110,6 +126,7 @@ tileweights.forEach(function (r){ //create map of the amount of steps to move in
         basemap[r[0]] = r[1] 
     })
 })
+
 
 
 function findPath(start,mspd){ //Need to optimize to include shortest path. Works okay for now.
@@ -167,6 +184,30 @@ function showMoves(character){
     }
 }
 
+function showAttacks(character){
+    var possibleattacks = [[+character.pos[0] + 1, +character.pos[1]],[+character.pos[0] - 1, +character.pos[1]],
+                        [+character.pos[0] , +character.pos[1]+1],[+character.pos[0], +character.pos[1]-1]]
+    
+
+        possibleattacks.forEach(function(pos){
+        correctedPos = pos.join().slice(0,pos.join().indexOf(',')) + '\\' + pos.join().slice(pos.join().indexOf(','))
+        $('#'+correctedPos).addClass('attacks')
+    })
+    
+}
+
+function removeAttacks(character){
+    var possibleattacks = [[+character.pos[0] + 1, +character.pos[1]],[+character.pos[0] - 1, +character.pos[1]],
+    
+    [+character.pos[0] , +character.pos[1]+1],[+character.pos[0], +character.pos[1]-1]]
+
+    possibleattacks.forEach(function(pos){
+
+    correctedPos = pos.join().slice(0,pos.join().indexOf(',')) + '\\' + pos.join().slice(pos.join().indexOf(','))
+    $('#'+correctedPos).removeClass('attacks')
+    })
+}
+
 //Should always be called after showMoves and during/before movement otherwise the positions will not be correct and 
 function removeMoves(character){
     for (var key in character.moves){
@@ -180,13 +221,7 @@ function removeMoves(character){
     }
 }
 
-for (var i = 0; i<enemies.length;i++){
-    enemies[i].ref.data(enemies[i])
-    enemies[i].moveto(i,0)
-}
 
-Leona.ref.data(Leona)
-Leona.moveto(5,5)
 
 function statupdate(object){
     if (object.ally == true){
@@ -243,14 +278,15 @@ $(".character").on('click',function(){
         }
     }
             
-    else if (phase === 'ChooseOpponent'){
-        phase = 'TargetSelect'
+    else if (phase === 'Attack'){
+        phase = 'ChooseCharacter'
         target = $(this).data()
-        target.active = true
-        target.moveto(3,5)
-        statupdate(target)
+        if (!(target.ally)){
+            statupdate(target)
+            player.attack(target)
+            removeAttacks(player)
+        }
     }
-
     // else if (phase === 'PlayerSelect'){
     //     player = $(this).data()
     //     phase = 'TargetSelect'
@@ -263,7 +299,7 @@ $(".character").on('click',function(){
         target = $(this).data()
         if ((target.ally == false) && (target.active == true)){
             player.attack(target)
-            
+
         }
         
 
@@ -274,22 +310,32 @@ $(".character").on('click',function(){
 });
 
 $(".col").on('click',function(){ 
-    //Stop showing movement if player clicks off a character
-    if ((showingMoves == true) && (!this.firstChild)){ 
+    //Stop showing movement/attacks if player clicks on empty space
+    if ( (!this.firstChild)){ 
         removeMoves(player)
-        showingMoves = false
+        if (phase =='Attack'){
+            removeAttacks(player)
+            phase = 'ChooseCharacter'
+            if (allies.every(function(char){return (!char.data.active)})){
+                phase = 'Enemy'
+            }
+        }
     }
+
     //In order to move it must be during the 'move', the the target block must be empty, and the player must be active(has not moved or attacked)
     if ((phase == 'Move') && ((!this.firstChild)) && (player.active)){
         var movetarget = parseID($(this).attr('id'), ',')
         if (player.moves[movetarget] != undefined){
             player.moveto(movetarget[0],movetarget[1])
             player.active = false
-            $(player.ref).find('img').attr('src','assets/images/Sprites/LeonaGrayed.png')
+            $(player.ref).find('img').attr('src','assets/images/Sprites/' + player.name + 'Grayed.png')
+            showAttacks(player)
+            phase = 'Attack'
         }
         else{
             phase = 'ChooseCharacter'
         }
     }
+
 })
 
