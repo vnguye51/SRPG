@@ -59,9 +59,11 @@ body{
     z-index: 1;
     position: absolute;
     left: 0px;
-    top: 0px;
-    font-size: 24px;
+    top: 430px;
+    font-size: 96px;
     font-weight: bold;
+    width: 1016px;
+    text-align: center
 }
 
 .character{
@@ -74,7 +76,8 @@ body{
     width: 400px;
     height: 1000px;
     float: right;
-    background-color: tan;
+    background-image: url('../images/Sprites/Enemybox.png');
+    background-size: 400px 1000px;
     overflow: hidden;
 
 }
@@ -86,8 +89,9 @@ body{
     width: 400px;
     height: 1000px;
     float: right;
-    background-color: gray;
     overflow: hidden;
+    background-image: url('../images/Sprites/AllyBox.png');
+    background-size: 400px 1000px;
     
     
 }
