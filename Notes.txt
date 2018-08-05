@@ -122,3 +122,5 @@ ShortestPath Algorithm(start,target)//completed but might need fine tuning due t
 
 * The shortestpath algorithm works but it should not be called on the enemy player's space but rather an empty
 tile next to the player
+
+* Error occurs at estimate -> shortestpath -> bestmove sometimes
