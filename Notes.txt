@@ -120,7 +120,9 @@ ShortestPath Algorithm(start,target)//completed but might need fine tuning due t
 			starttopos = score
 			estimatedcost = starttopos[neighbor] + estimate(neighbor,target) 
 
+
+KNOWN BUGS:
 * The shortestpath algorithm works but it should not be called on the enemy player's space but rather an empty
 tile next to the player
-
-* Error occurs at estimate -> shortestpath -> bestmove sometimes
+*Enemies do not attack unless they start their turn next to you
+*Labels do not have a priority

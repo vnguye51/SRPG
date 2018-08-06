@@ -1,4 +1,4 @@
-function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,ally,active,pos,index) {
+function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos) {
     this.ref = ref;
     this.name = name;
     this.hp = hp;
@@ -8,36 +8,70 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,ally,active,pos,index) {
     this.dodge = dodge;
     this.mspd = mspd;
     this.moves = null;
+
     this.validattacks = null;
     this.exp = exp;
+    this.giveexp = giveexp;
     this.ally = ally;
+
     
     this.active = active;
     this.pos = pos;
-
-    this.index = index;
-
-
+    this.levelup = function(){
+        setTimeout(function(){
+            levelUpSound.play();
+            printLabel("LEVEL UP")
+        },1000)
+        
+        printMessage(this.name + " leveled up!" )
+        this.acc += 5
+        this.dodge += 5
+        this.mspd += 1
+        this.ap += 10
+        this.exp -= 100
+    }
     this.attack = function(target){
+        
+        if(target.pos[0] == this.pos[0] - 1){
+            $(this.ref).animate({bottom:'50px'},250)
+            $(this.ref).animate({bottom:'0px'},250)
+        }
+        else if (target.pos[0] == this.pos[0] + 1){
+            $(this.ref).animate({top:'50px'},250)
+            $(this.ref).animate({top:'0px'},250)
+        }
+        else if (target.pos[1] == this.pos[1] + 1){
+            $(this.ref).animate({left:'50px'},250)
+            $(this.ref).animate({left:'0px'},250)
+        }
+        else if (target.pos[1] == this.pos[1] - 1){
+            $(this.ref).animate({right:'50px'},250)
+            $(this.ref).animate({right:'0px'},250)
+        }
 
-        console.log(this.name + ' attacks '+  target.name)
+
         var hitroll = Math.floor(Math.random()*100) 
         var enemyroll = Math.floor(Math.random()*100)
 
         if (this.acc > hitroll){
+            printMessage(this.name + ' attacks '+  target.name + ' dealing ' + this.ap + ' damage.')
             hitSound.play()
             target.hp = Math.max(target.hp-this.ap,0)
             if (target.hp <= 0) {
                 
+                printMessage(this.name + ' deals a lethal blow to ' + target.name)
                 removeChar(target)
-                
+                this.exp += target.giveexp
+                if (this.exp >= 100){
+                    this.levelup()
+                } 
                 
                 if (target.ally == false){ //Ally  killed enemy
 
                     if (enemies.length == 0){
                         phase = 'Victory'
-                        $('#victory').removeAttr('hidden')
-                        console.log('You win!')
+                        printLabel('VICTORY')
+                        printMessage("You have defeated all enemies!")
                     }
                 }
 
@@ -45,8 +79,9 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,ally,active,pos,index) {
                     allies.splice(allies.indexOf(target.ref),1)
                     if (enemies.length == 0){
                         phase = 'GameOver'
-                        $('#defeat').removeAttr('hidden')
-                        console.log('You lose!')
+                        printLabel('DEFEAT')
+                        printMessage("All allies have been slain.")
+                        
                     }
                 }
                
@@ -56,36 +91,77 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,ally,active,pos,index) {
 
         else {
             missSound.play()
+            printMessage(this.name + ' attacks but ' + target.name + ' parries!')
+
+            
         }
 
-        if ((target.acc > enemyroll) && (target.hp > 0)) {
-            this.hp = Math.max(this.hp-target.cp,0)
-            if (this.hp <= 0) {
-                removeChar(this)
-                if (this.ally == false){ //Ally  killed enemy
-                    if (enemies.length == 0){
-                        phase = 'Victory'
-                        console.log('You win!')
-                    }
-                }
+        $(this.ref).promise().done(function(){
+            if(this.data().pos[0] == target.pos[0] - 1){
+                $(target.ref).animate({bottom:'50px'},250)
+                $(target.ref).animate({bottom:'0px'},250)
+            }
+            else if (this.data().pos[0] == target.pos[0] + 1){
+                $(target.ref).animate({top:'50px'},250)
+                $(target.ref).animate({top:'0px'},250)
+            }
+            else if (this.data().pos[1] == target.pos[1] + 1){
+                $(target.ref).animate({left:'50px'},250)
+                $(target.ref).animate({left:'0px'},250)
+            }
+            else if (this.data().pos[1] == target.pos[1] - 1){
+                $(target.ref).animate({right:'50px'},250)
+                $(target.ref).animate({right:'0px'},250)
+            }
 
-                else{
-                    if (enemies.length == 0){
-                        phase = 'GameOver'
-                        console.log('You lose!')
+            if ((target.acc > enemyroll) && (target.hp > 0)) {
+                hitSound.play()
+                this.data().hp = Math.max(this.data().hp-target.cp,0)
+                printMessage(target.name + ' lands the riposte dealing ' + target.cp + ' damage.')
+                if (this.data().hp <= 0) {
+                    printMessage(this.data().name + ' deals a lethal blow to ' + target.name)
+                    removeChar(this.data())
+                    if (target.exp >= 100){
+                        target.levelup()
+                    }
+                    if (this.data().ally == false){ //Ally  killed enemy
+                        if (enemies.length == 0){
+                            phase = 'Victory'
+                            printLabel('VICTORY')
+                            printMessage("You have defeated all enemies!")
+                        }
+                    }
+    
+                    else{
+    
+                        if (enemies.length == 0){
+                            phase = 'GameOver'
+                            printLabel('DEFEAT')
+                            printMessage("All allies have been slain.")
+                        }
                     }
                 }
             }
-        }
+        
+            else if (target.hp > 0){
+                missSound.play()
+                printMessage(target.name + ' misses the riposte!')
+            }
+   
+
+
+
+            statupdate(target)
+            statupdate(this.data())
     
+        })
 
-        statupdate(target)
-        statupdate(this)
+     
 
-        if (allies.every(function(char){return (!char.data().active)})){
-                phase = 'Enemy'
-                enemyTurn()
-        }
+       
+     
+
+        
 
     };
 
@@ -97,12 +173,15 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,ally,active,pos,index) {
     };
 }
 
+
 var hitSound = document.createElement('audio')
-hitSound.src = 'assets/SFX/Hit.wav'
-hitSound.volume = 0.3
+hitSound.src = ('assets/SFX/Hit.wav')
+hitSound.volume = 0.25
 var missSound = document.createElement('audio')
-missSound.src = 'assets/SFX/Miss.wav'
-missSound.volume = 0.5
+missSound.src = ('assets/SFX/Miss.wav')
+var levelUpSound = document.createElement('audio')
+levelUpSound.src = ('assets/SFX/LevelUp.wav')
+
 
 var gamegrid = [] // I might use this
 //Create gamegrid
@@ -128,12 +207,12 @@ var phase = 'ChooseCharacter'
 
 
 //Can probably move this section directly into the one below later
-var Lucina = new Character($('#lucina'),'Lucina',100,20,10,100,20,3,0,false, false, [0,2])
-var Ryoma = new Character($('#ryoma'),'Ryoma',100,20,10,20,100,3,0,false, false, [1,1])
-var Hector = new Character($('#hector'),'Hector',100,20,20,100,20,3,0,false, false, [2,0])
-var Chamomile = new Character($('#chamomile'),'Chamomile',100,100,10,100,20,5,0,true, true, [8,8])
-var Earl = new Character($('#earl'),'Earl',100,100,10,0,100,5,0,true, true, [9,7])
-var Ceylon = new Character($('#ceylon'),'Ceylon',100,100,10,100,20,5,0,true, true, [7,9])
+var Lucina = new Character($('#lucina'),'Lucina',100,20,10,100,20,3,0,100,false, false, [0,2])
+var Ryoma = new Character($('#ryoma'),'Ryoma',100,20,10,20,100,3,0,100,false, false,[1,1])
+var Hector = new Character($('#hector'),'Hector',100,20,20,100,20,3,0,100,false, false, [2,0])
+var Chamomile = new Character($('#chamomile'),'Chamomile',100,100,10,100,20,5,0,0,true, true, [8,8])
+var Earl = new Character($('#earl'),'Earl',100,100,10,0,100,5,0,0,true, true, [9,7])
+var Ceylon = new Character($('#ceylon'),'Ceylon',100,100,10,100,20,5,0,0,true, true, [7,9])
 
 
 var enemies = [Lucina, Ryoma, Hector]
@@ -159,15 +238,15 @@ enemies = [$('#lucina'),$('#ryoma'),$('#hector')]
 
 var originalTileWeights =  [[[-1,-1],99],[[-1,0],99],[[-1,1],99],[[-1,2],99],[[-1,3],99],[[-1,4],99],[[-1,5],99],[[-1,6],99],[[-1,7],99],[[-1,8],99],[[-1,9],99],[[-1,10],99],
                     [[0,-1],99],[[0,0],1],[[0,1],1],[[0,2],1],[[0,3],1],[[0,4],1],[[0,5],1],[[0,6],1],[[0,7],1],[[0,8],1],[[0,9],1],[[0,10],99],
-                    [[1,-1],99],[[1,0],1],[[1,1],1],[[1,2],1],[[1,3],1],[[1,4],1],[[1,5],1],[[1,6],1],[[1,7],1],[[1,8],1],[[1,9],1],[[1,10],99],
-                    [[2,-1],99],[[2,0],1],[[2,1],1],[[2,2],1],[[2,3],1],[[2,4],1],[[2,5],1],[[2,6],1],[[2,7],1],[[2,8],1],[[2,9],1],[[2,10],99],
-                    [[3,-1],99],[[3,0],1],[[3,1],1],[[3,2],1],[[3,3],1],[[3,4],1],[[3,5],1],[[3,6],1],[[3,7],1],[[3,8],1],[[3,9],1],[[3,10],99],
-                    [[4,-1],99],[[4,0],1],[[4,1],1],[[4,2],1],[[4,3],1],[[4,4],1],[[4,5],1],[[4,6],1],[[4,7],1],[[4,8],1],[[4,9],1],[[4,10],99],
-                    [[5,-1],99],[[5,0],1],[[5,1],1],[[5,2],1],[[5,3],1],[[5,4],1],[[5,5],1],[[5,6],1],[[5,7],1],[[5,8],1],[[5,9],1],[[5,10],99],
-                    [[6,-1],99],[[6,0],1],[[6,1],1],[[6,2],1],[[6,3],1],[[6,4],1],[[6,5],1],[[6,6],1],[[6,7],1],[[6,8],1],[[6,9],1],[[6,10],99],
-                    [[7,-1],99],[[7,0],1],[[7,1],1],[[7,2],1],[[7,3],1],[[7,4],1],[[7,5],1],[[7,6],1],[[7,7],1],[[7,8],1],[[7,9],1],[[7,10],99],
-                    [[8,-1],99],[[8,0],1],[[8,1],1],[[8,2],1],[[8,3],1],[[8,4],1],[[8,5],1],[[8,6],1],[[8,7],1],[[8,8],1],[[8,9],1],[[8,10],99],
-                    [[9,-1],99],[[9,0],1],[[9,1],1],[[9,2],1],[[9,3],1],[[9,4],1],[[9,5],1],[[9,6],1],[[9,7],1],[[9,8],1],[[9,9],1],[[9,10],99],
+                    [[1,-1],99],[[1,0],1],[[1,1],1],[[1,2],1],[[1,3],1],[[1,4],1],[[1,5],1],[[1,6],1],[[1,7],3],[[1,8],1],[[1,9],1],[[1,10],99],
+                    [[2,-1],99],[[2,0],1],[[2,1],1],[[2,2],1],[[2,3],1],[[2,4],1],[[2,5],1],[[2,6],2],[[2,7],2],[[2,8],1],[[2,9],1],[[2,10],99],
+                    [[3,-1],99],[[3,0],1],[[3,1],1],[[3,2],1],[[3,3],1],[[3,4],1],[[3,5],3],[[3,6],1],[[3,7],1],[[3,8],1],[[3,9],1],[[3,10],99],
+                    [[4,-1],99],[[4,0],1],[[4,1],2],[[4,2],1],[[4,3],1],[[4,4],3],[[4,5],3],[[4,6],3],[[4,7],1],[[4,8],2],[[4,9],1],[[4,10],99],
+                    [[5,-1],99],[[5,0],1],[[5,1],1],[[5,2],1],[[5,3],2],[[5,4],3],[[5,5],2],[[5,6],3],[[5,7],1],[[5,8],1],[[5,9],1],[[5,10],99],
+                    [[6,-1],99],[[6,0],1],[[6,1],1],[[6,2],1],[[6,3],3],[[6,4],1],[[6,5],1],[[6,6],1],[[6,7],1],[[6,8],1],[[6,9],1],[[6,10],99],
+                    [[7,-1],99],[[7,0],1],[[7,1],1],[[7,2],1],[[7,3],2],[[7,4],1],[[7,5],1],[[7,6],1],[[7,7],1],[[7,8],1],[[7,9],1],[[7,10],99],
+                    [[8,-1],99],[[8,0],1],[[8,1],3],[[8,2],1],[[8,3],1],[[8,4],1],[[8,5],1],[[8,6],1],[[8,7],1],[[8,8],1],[[8,9],1],[[8,10],99],
+                    [[9,-1],99],[[9,0],2],[[9,1],1],[[9,2],1],[[9,3],1],[[9,4],1],[[9,5],1],[[9,6],1],[[9,7],1],[[9,8],1],[[9,9],1],[[9,10],99],
                     [[10,-1],99],[[10,0],99],[[10,1],99],[[10,2],99],[[10,3],99],[[10,4],99],[[10,5],99],[[10,6],99],[[10,7],99],[[10,8],99],[[10,9],99],[[10,10],99],]
 
 var allymovemap = {} //Store the tileweights in a map
@@ -192,7 +271,7 @@ function updateAllyTileWeights(){
 
 function removeChar(char){
     index = null
-    $(char.ref).parent().empty()
+    
     char.pos = [-50,-50]
     if (char.ally == true){
 
@@ -209,14 +288,18 @@ function removeChar(char){
         
     else{
         for (var i = 0;i < enemies.length;i++){
+
             if (enemies[i].data().name == char.name){
+              
                 index = i
                 
             }
         
         }
         enemies.splice(index,1)
+        
     }
+    $(char.ref).parent().empty()
     
 }
 
@@ -340,7 +423,24 @@ function removeMoves(character){
     }
 }
 
+function printMessage(message){
+    $('#messages').prepend('<br>' + message + '<br>')
+}
 
+function printLabel(label){
+    var message = $('<div></div>').text(label)
+    message.addClass('label')
+    $('#container').append(message)
+    message.animate({opacity: '1'},100)
+    setTimeout(function(){
+        message.animate({ opacity: '0'},1000)
+        message.promise().done(function(){
+            message.remove()
+        })
+    },1200)
+    
+}   
+    
 
 function statupdate(object){
     if (object.ally == true){
@@ -358,8 +458,7 @@ function statupdate(object){
         $('#messagebox').append('<br>' + object.name + '<br>')
         $('#messagebox').append('<br> HP: ' + object.hp + '<br>')
         $('#messagebox').append('<br> ATT: ' + object.ap + '<br>')
-        $('#messagebox').append('<br> Hit: ' + object.acc + '<br>')
-        $('#statbox').append('<br> EXP: ' + object.exp+ '<br>')
+        $('#messagebox').append('<br> HIT: ' + object.acc + '<br>')
 
     }
 }
@@ -439,7 +538,6 @@ function shortestPath(start,target){
 
         if (indexOfa2Ina1([current],[target]) != -1){
             return reconstructPath(cameFrom,current,[current],startToPos)
-            // return reconstructPath(cameFrom,current,[])
         }
 
         openSet.splice(openSet.indexOf(current),1)
@@ -513,6 +611,7 @@ function bestMove(enemy){
 
 
 function enemyTurn(){
+    // printLabel('ENEMY PHASE')
     allies.forEach(function(char){
         char.data().active = true
         $(char).find('img').attr('src','assets/images/Sprites/' + char.data().name + '.png')
@@ -527,76 +626,110 @@ function enemyTurn(){
 }
 
 function allyTurn(){
+    printLabel('PLAYER PHASE')
     phase = 'ChooseCharacter'
   
 }
 
-$(".character").on('click',function(){
-    if (phase === 'ChooseCharacter' && ($(this).data().active)){
-        player = $(this).data()
-        showMoves(player)
-        if (player.ally == true){
-            phase = 'Move'
-            statupdate(player)
-            
-        }
-    }
-            
-    else if (phase === 'Attack'){
-        removeAttacks(player)
-        phase = 'ChooseCharacter'
-        target = $(this).data()
-        if (!(target.ally)){
-            statupdate(target)
-            if (indexOfa2Ina1(player.validattacks,target.pos) != -1){  
-            player.attack(target)
-            }
-        }
-    }
+// function animatePath(char,path){
+
+// }
 
 
-    else if (phase === 'TargetSelect'){
-        target = $(this).data()
-        if ((target.ally == false) && (target.active == true)){
-            player.attack(target)
-
-        }
-        
-
-    }
-
-        
+$('.col').on('click',function(){
     
-});
-
-$(".col").on('click',function(){ 
-    //Stop showing movement/attacks if player clicks on empty space
-    if ( (!this.firstChild)){ 
-        removeMoves(player)
-        if (phase =='Attack'){
-            removeAttacks(player)
-            phase = 'ChooseCharacter'
-            if (allies.every(function(char){return (!char.data().active)})){
-                phase = 'Enemy'
-                enemyTurn()
+    if (phase === 'ChooseCharacter'){
+        if (this.firstChild){
+            if ($(this.firstChild).data().active && $(this.firstChild).data().ally){
+                
+                player = $(this.firstChild).data()
+                showMoves(player)
+                phase = 'Move'
+                statupdate(player)
+            }
+            else if ($(this.firstChild).data().ally == false){
+                target = $(this.firstChild).data()
+                 showMoves(target)
+                 phase = 'ShowEnemyMoves'
+                 statupdate(target)
+            }
+        }
+        
+           
+        else{}
+    }
+    
+    else if (phase ==='ShowEnemyMoves'){
+        //Same as ChooseCharacter but removes the 
+        //possible moves of the target when selecting a new character
+        removeMoves(target)
+        if (this.firstChild){
+            if ($(this.firstChild).data().active && $(this.firstChild).data().ally){
+        
+                player = $(this.firstChild).data()
+                showMoves(player)
+                phase = 'Move'
+                statupdate(player)
+            }
+            else if ($(this.firstChild).data().ally == false){
+                target = $(this.firstChild).data()
+                    showMoves(target)
+                    phase = 'ShowEnemyMoves'
+                    statupdate(target)
             }
         }
     }
-
-    //In order to move it must be during the 'move', the the target block must be empty, and the player must be active(has not moved or attacked)
-    if ((phase == 'Move') && ((!this.firstChild)) && (player.active)){
+    else if (phase === 'Move'){
+        removeMoves(player)
         var movetarget = parseID($(this).attr('id'), ',')
         if (player.moves[movetarget] != undefined){
-            player.moveto(+movetarget[0],+movetarget[1])
-            player.active = false
-            $(player.ref).find('img').attr('src','assets/images/Sprites/' + player.name + 'Grayed.png')
-            showAttacks(player)
-            phase = 'Attack'
+            if (this.firstChild){
+                if ($(this.firstChild).data().name == player.name){
+                    phase = 'Attack'
+                    showAttacks(player)
+                }
+                else{
+                    phase = 'ChooseCharacter'
+                }
+            }
+            
+            else {
+                player.moveto(+movetarget[0],+movetarget[1])
+                updateEnemyTileWeights()
+                phase = 'Attack'
+                showAttacks(player)
+            }
         }
         else{
             phase = 'ChooseCharacter'
         }
+        
     }
 
+    else if (phase == 'Attack'){
+        removeAttacks(player)
+        $(player.ref).find('img').attr('src','assets/images/Sprites/' + player.name + 'Grayed.png')
+        player.active = false
+        phase = 'ChooseCharacter'
+        
+        if (this.firstChild){
+            target = $(this.firstChild).data()
+            if (!(target.ally)){
+                statupdate(target)
+                if (indexOfa2Ina1(player.validattacks,target.pos) != -1){  
+                player.attack(target)
+                }
+            }
+        }
+
+        if (allies.every(function(char){return (!char.data().active)})){
+            phase = 'Enemy'
+            setTimeout(function(){enemyTurn()},1200)
+            // $(target.ref).promise().done(function(){enemyTurn()})
+        }
+            
+    }
 })
+
+
 

@@ -5,18 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rpg</title>
     <link rel="stylesheet" type="text/css" href="assets/css/reset.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 </head>
 
 
 <body>
     <div id='container'>
-        <div id='messagebox'></div>
-        <div id='statbox'></div>
-        <div id='victory' class='label' hidden>VICTORY</div>
-        <div id='defeat'class='label' hidden>DEFEAT</div>
+        <div id='label' class='label' hidden>VICTORY</div>
     </div>
 
+    <div id = 'statsContainer'>
+        <div id='messagebox'></div>
+        <div id='statbox'></div>
+        <div id ='messages'></div>
+    </div>
+
+    
+    <!-- The containers below are immediately placed into positions by the javascript on page load -->
     <div class ='character' id='hector'>
         <img src ='assets/images/Sprites/AxeSkeleton.png' alt = 'Hector' class = 'Cimage'>
     </div>
