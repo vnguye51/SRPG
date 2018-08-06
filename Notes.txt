@@ -124,5 +124,12 @@ ShortestPath Algorithm(start,target)//completed but might need fine tuning due t
 KNOWN BUGS:
 * The shortestpath algorithm works but it should not be called on the enemy player's space but rather an empty
 tile next to the player
+	*Find the nearest empty tile next to the player and path there
 *Enemies do not attack unless they start their turn next to you
 *Labels do not have a priority
+
+THINGS TO ADD:
+* link to instruction page
+* stock image(emblem?) for enemies and allies
+* link to the basic game
+* updatetileweights are probably being called too often

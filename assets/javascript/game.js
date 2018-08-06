@@ -17,7 +17,9 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
     
     this.active = active;
     this.pos = pos;
+
     this.levelup = function(){
+        //Increases stats, called after the player reaches 100 exp
         setTimeout(function(){
             levelUpSound.play();
             printLabel("LEVEL UP")
@@ -30,8 +32,11 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
         this.ap += 10
         this.exp -= 100
     }
+
     this.attack = function(target){
-        
+        //Attack logic
+
+        //Initial attack animations(can probably turn this into a function)
         if(target.pos[0] == this.pos[0] - 1){
             $(this.ref).animate({bottom:'50px'},250)
             $(this.ref).animate({bottom:'0px'},250)
@@ -54,6 +59,7 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
         var enemyroll = Math.floor(Math.random()*100)
 
         if (this.acc > hitroll){
+            //If you hit
             printMessage(this.name + ' attacks '+  target.name + ' dealing ' + this.ap + ' damage.')
             hitSound.play()
             target.hp = Math.max(target.hp-this.ap,0)
@@ -69,6 +75,7 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
                 if (target.ally == false){ //Ally  killed enemy
 
                     if (enemies.length == 0){
+                        //All enemies defeated //Should make a victory() function
                         phase = 'Victory'
                         printLabel('VICTORY')
                         printMessage("You have defeated all enemies!")
@@ -77,7 +84,8 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
 
                 else{
                     allies.splice(allies.indexOf(target.ref),1)
-                    if (enemies.length == 0){
+                    if (allies.length == 0){
+                        //All allies defeated //Should make a defeat() function
                         phase = 'GameOver'
                         printLabel('DEFEAT')
                         printMessage("All allies have been slain.")
@@ -90,6 +98,7 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
         }
 
         else {
+            //attack misses
             missSound.play()
             printMessage(this.name + ' attacks but ' + target.name + ' parries!')
 
@@ -97,6 +106,8 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
         }
 
         $(this.ref).promise().done(function(){
+            //promise waits until the initial attack animation is done
+            //Counterattack animation
             if(this.data().pos[0] == target.pos[0] - 1){
                 $(target.ref).animate({bottom:'50px'},250)
                 $(target.ref).animate({bottom:'0px'},250)
@@ -115,6 +126,7 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
             }
 
             if ((target.acc > enemyroll) && (target.hp > 0)) {
+                //counterattack lands
                 hitSound.play()
                 this.data().hp = Math.max(this.data().hp-target.cp,0)
                 printMessage(target.name + ' lands the riposte dealing ' + target.cp + ' damage.')
@@ -144,6 +156,7 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
             }
         
             else if (target.hp > 0){
+                //counterattack misses
                 missSound.play()
                 printMessage(target.name + ' misses the riposte!')
             }
@@ -174,6 +187,7 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
 }
 
 
+//CREATE SFX///
 var hitSound = document.createElement('audio')
 hitSound.src = ('assets/SFX/Hit.wav')
 hitSound.volume = 0.25
@@ -181,11 +195,14 @@ var missSound = document.createElement('audio')
 missSound.src = ('assets/SFX/Miss.wav')
 var levelUpSound = document.createElement('audio')
 levelUpSound.src = ('assets/SFX/LevelUp.wav')
+//////////////////
+
 
 
 var gamegrid = [] // I might use this
 //Create gamegrid
 for (var i = 0; i<10;i++){
+    //Create grid on html
     var row = []
     var rowref = $('<div>')
     rowref.addClass('row')
@@ -206,7 +223,11 @@ var target = null
 var phase = 'ChooseCharacter'
 
 
-//Can probably move this section directly into the one below later
+//DEFINE CHARACTERS HERE
+var Red = new Character($('#red'),'Red',100,20,10,100,20,3,0,100,false, false, [8,1])
+var Green = new Character($('#green'),'Green',100,20,10,100,20,3,0,100,false, false, [1,8])
+var White = new Character($('#white'),'White',100,20,10,100,20,3,0,100,false, false, [0,0])
+var Black = new Character($('#black'),'Black',100,20,10,100,20,3,0,100,false, false, [0,1])
 var Lucina = new Character($('#lucina'),'Lucina',100,20,10,100,20,3,0,100,false, false, [0,2])
 var Ryoma = new Character($('#ryoma'),'Ryoma',100,20,10,20,100,3,0,100,false, false,[1,1])
 var Hector = new Character($('#hector'),'Hector',100,20,20,100,20,3,0,100,false, false, [2,0])
@@ -215,27 +236,31 @@ var Earl = new Character($('#earl'),'Earl',100,100,10,0,100,5,0,0,true, true, [9
 var Ceylon = new Character($('#ceylon'),'Ceylon',100,100,10,100,20,5,0,0,true, true, [7,9])
 
 
-var enemies = [Lucina, Ryoma, Hector]
+//CREATE ARRAYS FOR ENEMIES/ALLIES FOR GAME TO LOOP THROUGH
+var enemies = [Lucina, Ryoma, Hector,White,Black,Green,Red]
 var allies = [Chamomile,Earl,Ceylon]
 
 //Initialize position of allies and store their object reference in the tile
 enemies.forEach(function(char){
     char.ref.data(char)
-    char.moveto(char.pos[0],char.pos[1])
-    
+    char.moveto(char.pos[0],char.pos[1]) 
 })
-
 //Initialize position of allies
 allies.forEach(function(char){
     char.ref.data(char)
-    char.moveto(char.pos[0],char.pos[1])
-    
+    char.moveto(char.pos[0],char.pos[1])   
 })
-
+// allies = [$('#chamomile'),$('#earl'),$('#ceylon')]
+// enemies = [$('#lucina'),$('#ryoma'),$('#hector')]
 //Replace the allies variable with the jquery references after initialization
-allies = [$('#chamomile'),$('#earl'),$('#ceylon')]
-enemies = [$('#lucina'),$('#ryoma'),$('#hector')]
+for (var i = 0; i < allies.length;i++){
+    allies[i] = allies[i].ref
+}
+for (var i = 0; i < enemies.length;i++){
+    enemies[i] = enemies[i].ref
+}
 
+//////////////////////////MOVEMENT LOGIC/////////////////////////
 var originalTileWeights =  [[[-1,-1],99],[[-1,0],99],[[-1,1],99],[[-1,2],99],[[-1,3],99],[[-1,4],99],[[-1,5],99],[[-1,6],99],[[-1,7],99],[[-1,8],99],[[-1,9],99],[[-1,10],99],
                     [[0,-1],99],[[0,0],1],[[0,1],1],[[0,2],1],[[0,3],1],[[0,4],1],[[0,5],1],[[0,6],1],[[0,7],1],[[0,8],1],[[0,9],1],[[0,10],99],
                     [[1,-1],99],[[1,0],1],[[1,1],1],[[1,2],1],[[1,3],1],[[1,4],1],[[1,5],1],[[1,6],1],[[1,7],3],[[1,8],1],[[1,9],1],[[1,10],99],
@@ -249,9 +274,36 @@ var originalTileWeights =  [[[-1,-1],99],[[-1,0],99],[[-1,1],99],[[-1,2],99],[[-
                     [[9,-1],99],[[9,0],2],[[9,1],1],[[9,2],1],[[9,3],1],[[9,4],1],[[9,5],1],[[9,6],1],[[9,7],1],[[9,8],1],[[9,9],1],[[9,10],99],
                     [[10,-1],99],[[10,0],99],[[10,1],99],[[10,2],99],[[10,3],99],[[10,4],99],[[10,5],99],[[10,6],99],[[10,7],99],[[10,8],99],[[10,9],99],[[10,10],99],]
 
-var allymovemap = {} //Store the tileweights in a map
+var allymovemap = {} //Tileweights, Store the steps needed to move into a tile in a map
 var enemymovemap = {}
 
+
+
+function removeChar(char){
+    //Remove char from game
+    index = null
+    char.pos = [-50,-50]
+    if (char.ally == true){
+        //If ally
+        for (var i = 0;i < allies.length;i++){
+            if (allies[i].data().name == char.name){
+                index = i     
+            }
+        }
+        allies.splice(index,1)
+    }
+    else{
+        //If enemy
+        for (var i = 0;i < enemies.length;i++){
+            //Remove the enemy from the array
+            if (enemies[i].data().name == char.name){     
+                index = i
+            }
+        }
+        enemies.splice(index,1)
+    }
+    $(char.ref).parent().empty()
+}
 //Use in between each turn. 
 function updateAllyTileWeights(){
     //Recreate original weightmap
@@ -260,56 +312,19 @@ function updateAllyTileWeights(){
             allymovemap[r[0]] = r[1] 
         })
     })
-    
     var tileWeights = originalTileWeights.slice()  //Make a copy of the array
     enemies.forEach(function(char){
         allymovemap[char.data().pos] = 99    
-        
-    
     })   
+    //Replace tile weights based on new positions
 }
-
-function removeChar(char){
-    index = null
-    
-    char.pos = [-50,-50]
-    if (char.ally == true){
-
-        for (var i = 0;i < allies.length;i++){
-            if (allies[i].data().name == char.name){
-                index = i
-                
-            }
-        
-        }
-        allies.splice(index,1)
-    }
-
-        
-    else{
-        for (var i = 0;i < enemies.length;i++){
-
-            if (enemies[i].data().name == char.name){
-              
-                index = i
-                
-            }
-        
-        }
-        enemies.splice(index,1)
-        
-    }
-    $(char.ref).parent().empty()
-    
-}
-
 function updateEnemyTileWeights(){
+    //Same logic as ally but with different targets; maybe put them in the same function later
     originalTileWeights.forEach(function (r){ 
         r.forEach(function (c){
             enemymovemap[r[0]] = r[1] 
         })
     })
-   
     var tileWeights = originalTileWeights.slice()  //Make a copy of the array
     allies.forEach(function(char){
         enemymovemap[char.data().pos] = 99    
@@ -320,8 +335,7 @@ updateAllyTileWeights()
 updateEnemyTileWeights()
 
 function findPath(start,mspd,map){ //Need to optimize to include shortest path. Works okay for now.
-    
-    updateAllyTileWeights()
+    updateAllyTileWeights() 
     function Path(stepsLeft,pathTaken){
         this.stepsLeft = stepsLeft;
         this.pathTaken = pathTaken;
@@ -423,6 +437,9 @@ function removeMoves(character){
     }
 }
 
+
+//////////////MESSAGE AND LABEL LOGGING///////////////////////
+
 function printMessage(message){
     $('#messages').prepend('<br>' + message + '<br>')
 }
@@ -444,8 +461,6 @@ function printLabel(label){
 
 function statupdate(object){
     if (object.ally == true){
-
-
         $('#statbox').empty()
         $('#statbox').append('<br>' + object.name + '<br>')
         $('#statbox').append('<br> HP: ' + object.hp + '<br>')
@@ -463,6 +478,8 @@ function statupdate(object){
     }
 }
 
+
+///////////UTILITY FUNCTIONS///////////////////
 function parseID(id,delimiter){ //Parse through our custom ID tag to determine location of target box
     var row = ''
     var col = ''
@@ -488,9 +505,9 @@ function indexOfa2Ina1(a1,a2){
     }))
 }
 
-// var showingMoves = false
 
 function shortestPath(start,target){
+    //This function used in enemy turn
     function reconstructPath(cameFrom,current,path){
         if (current in cameFrom){
             path.splice(0,0,cameFrom[current])
@@ -611,6 +628,7 @@ function bestMove(enemy){
 
 
 function enemyTurn(){
+    //ENEMY TURN
     // printLabel('ENEMY PHASE')
     allies.forEach(function(char){
         char.data().active = true
@@ -631,11 +649,10 @@ function allyTurn(){
   
 }
 
-// function animatePath(char,path){
 
-// }
-
-
+//////////////////ON CLICK///////////////
+////CYCLES THROUGH PHASES 'ChooseCharacter' -> 'Move' -> 'Attack' 
+// After attack checks if all allies have moved and if so, switch to the enemy turn and lockout clicks
 $('.col').on('click',function(){
     
     if (phase === 'ChooseCharacter'){
