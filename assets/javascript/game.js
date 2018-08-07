@@ -120,7 +120,9 @@ function Character(ref,name,hp,ap,acc,dodge,mspd,exp,giveexp,ally,active,pos) {
                 printMessage(target.name + ' lands the riposte dealing ' + target.ap + ' damage.')
                 if (this.data().hp <= 0) {
                     printMessage(target.name + ' deals a lethal blow to ' +this.data().name )
+                    target.exp += this.data().giveexp
                     removeChar(this.data())
+
                     if (target.exp >= 100){
                         target.levelup()
                     }
