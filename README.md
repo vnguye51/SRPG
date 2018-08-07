@@ -66,12 +66,14 @@ Enemy Movement:
 
 ## Known Issues and things to implement:
 ### High Priority:
+* Animation sometimes skips, might be because elements are being pushed out of their box if the box is already taken
+* AI competes for the same spots. They are allowed to move through each other but if they cannot go to their target location they are currently set not to move.
 
-* AI competes for the same spots. They are allowed to move through each other but if they cannot go to their target location they choose not to move.
-* The path is not recorded correctly for player movement, it is recorded correctly for enemy movement
 * Enemies will only attack if they START their turn adjacent to an ally
 * Enemies do not move into the last tile they are able to
+
 ### Low Priority:
+* Clicking too
 * Hit sound does not play during a counterattack(but miss sound does)
 * The level up banner denies the mouse from hovering over tiles while it is shown
 * Forest tiles look a bit ugly
@@ -80,4 +82,3 @@ Enemy Movement:
 * Level up info should be another div that temporarily covers the screen showing the stats that increased
 * Character portraits/emblems
 * SFX
-+

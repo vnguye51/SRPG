@@ -25,8 +25,8 @@ function Character(ref,name,hp,ap,acc,dodge,mspd,exp,giveexp,ally,active,pos) {
         },1000)
         
         printMessage(this.name + " leveled up!" )
-        this.acc += 5
-        this.dodge += 5
+        this.acc += 10
+        this.dodge += 10
         this.mspd += 1
         this.ap += 10
         this.exp -= 100
@@ -154,6 +154,8 @@ function Character(ref,name,hp,ap,acc,dodge,mspd,exp,giveexp,ally,active,pos) {
     };
 
     this.moveto = function(targetrow,targetcol){ 
+        $(this.ref).css('left','0px')
+        $(this.ref).css('bottom','0px')
         this.ref.detach()
         this.pos = [targetrow,targetcol]
         $('#'+targetrow+'\\,'+targetcol).append(this.ref)
@@ -235,7 +237,6 @@ for (var i = 0; i < enemies.length;i++){
 }
 
 function removeChar(char){
-    console.log('a')
     //Remove char from game
     index = null
     char.pos = [-50,-50]
@@ -244,11 +245,9 @@ function removeChar(char){
         for (var i = 0;i < allies.length;i++){
             
             if (allies[i].data().name == char.name){
-                console.log(allies[i].data().name,char.name)
                 index = i     
             }
         }
-        console.log('b')
         allies.splice(index,1)
     }
     else{
@@ -358,14 +357,14 @@ function findPath(start,mspd,map){
             }
             //If you have exactly enough steps push it to the closedset
             else if (travelmap[curr].stepsLeft - map[neighbor] == 0){
-                travelmap[neighbor] = new Path(travelmap[curr].stepsLeft - map[neighbor], travelmap[curr].pathTaken.concat(neighbor))
+                travelmap[neighbor] = new Path(travelmap[curr].stepsLeft - map[neighbor], travelmap[curr].pathTaken.concat([neighbor]))
                 closedset.push(neighbor)
             }
             else{
             //If the tile has not been previously calculated and it is possible to move into it with steps remaining
             //Put that tile in the Open Set and log its Path in the map.
                 openset.push(neighbor)
-                travelmap[neighbor] = new Path(travelmap[curr].stepsLeft - map[neighbor], travelmap[curr].pathTaken.concat(neighbor))
+                travelmap[neighbor] = new Path(travelmap[curr].stepsLeft - map[neighbor], travelmap[curr].pathTaken.concat([neighbor]))
             }
         })
     }
@@ -373,6 +372,31 @@ function findPath(start,mspd,map){
     return travelmap
 }
 
+
+function animateMove(character,path){
+    //Redraws the path and queues up animations
+
+    prev = character.pos
+    var vert = 0
+    var hor = 0
+    for (var i = 0;i<path.length;i++){
+        if(prev[0]-1 == path[i][0]){
+            vert += 50
+        }
+        else if (prev[0]+1 == path[i][0]){
+            vert -= 50
+        }
+        else if (prev[1]+1 == path[i][1]){
+            hor += 50
+        }
+        else if (prev[1]-1 == path[i][1]){
+            hor -= 50
+        }
+        $(character.ref).animate({bottom: vert + 'px',left: hor + 'px'},150,'linear')
+            
+        prev = path[i]
+    }
+}
 
 function showMoves(character){
     if (character.ally){
@@ -443,13 +467,15 @@ function printLabel(label){
     message.addClass('label')
     $('#container').append(message)
     message.animate({opacity: '1'},100)
-    setTimeout(function(){
-        message.animate({ opacity: '0'},1000)
-        message.promise().done(function(){
-            message.remove()
-        })
-    },1200)
-    
+    if (label == 'VICTORY' || label == 'DEFEAT'){}
+    else{
+        setTimeout(function(){
+            message.animate({ opacity: '0'},1000)
+            message.promise().done(function(){
+                message.remove()
+            })
+        },1200)        
+    }
 }   
     
 
@@ -584,6 +610,9 @@ function bestMove(enemy){
     var minDistance = 999
     var bestTile = enemy.pos
     var bestTarget = null
+    var bestPath = null
+    var bestPathIndex = 0
+    var tempIndex = 0
     for(var i = 0;i<allies.length;i++){
         var targetPos = allies[i].data().pos
         var path = shortestPath(enemy.pos,targetPos)
@@ -594,46 +623,75 @@ function bestMove(enemy){
             if (stepsTaken <= enemy.mspd){
                 if(enemies.every(function(enemy){return indexOfa2Ina1([enemy.data().pos],[path[j]]) == -1})){
                     lastTile = path[j]
+                    tempIndex = j
+
                 }
             }
         }
         if (stepsTaken < minDistance){
             minDistance = stepsTaken
             bestTile = lastTile
+            bestPathIndex = tempIndex
+            bestPath = path.slice(0,bestPathIndex+1)
+            
             if ((Math.abs(targetPos[0] - bestTile[0])+Math.abs(targetPos[1] - bestTile[1])) <= 1){
                 bestTarget = allies[i]
             }
         }
     }
-    enemy.moveto(bestTile[0],bestTile[1])
-    if (bestTarget != null){
-        enemy.attack(bestTarget.data())
-        updateEnemyTileWeights()
-        updateAllyTileWeights()
+    
+    animateMove(enemy,bestPath)
 
-
-    }
+    $(enemy.ref).promise().done(function(){
+        enemy.moveto(bestTile[0],bestTile[1])
+        if (bestTarget != null){
+            enemy.attack(bestTarget.data())
+            updateEnemyTileWeights()
+            updateAllyTileWeights()
+        }
+    })
+   
 }
 
 function enemyTurn(){
     //ENEMY TURN
-    // printLabel('ENEMY PHASE')
+    printLabel('ENEMY PHASE')
     allies.forEach(function(char){
         char.data().active = true
         $(char).find('img').attr('src','assets/images/Sprites/' + char.data().name + '.png')
     })
     updateEnemyTileWeights()
-    enemies.forEach( function(enemy){
-        bestMove(enemy.data())
-    })
+
+    var i = 0
+
+    function moveNext(i){
+        console.log(i)
+        //Wait for each enemy to finish moving before moving onto the next enemy
+        //Recursive promises
+        if (i < enemies.length){
+            bestMove(enemies[i].data())
+            $('.character').promise().done(function(){
+                moveNext(i)
+            })
+            i ++
+        }
+        else{
+            setTimeout(function(){allyTurn()},1200)
+        }
+        
+    }
+    
+    moveNext(i)
     updateAllyTileWeights()
-    allyTurn()
+    
 }
 
 function allyTurn(){
     printLabel('PLAYER PHASE')
     phase = 'ChooseCharacter' 
 }
+
+
 
 //////////////////ON CLICK///////////////
 ////CYCLES THROUGH PHASES 'ChooseCharacter' -> 'Move' -> 'Attack' 
@@ -696,10 +754,15 @@ $('.col').on('click',function(){
             }
             
             else {
-                player.moveto(+movetarget[0],+movetarget[1])
-                updateEnemyTileWeights()
-                phase = 'Attack'
-                showAttacks(player)
+                animateMove(player,player.moves[movetarget].pathTaken)
+                phase = 'Moving'
+                $(player.ref).promise().done(function(){
+                    player.moveto(+movetarget[0],+movetarget[1])
+                    updateEnemyTileWeights()
+                    phase = 'Attack'
+                    showAttacks(player)
+                })
+                
             }
         }
         else{
