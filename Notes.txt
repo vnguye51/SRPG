@@ -10,10 +10,9 @@ Game Logic
 	* The enemy then retaliates with his Counter Attack Power
 
 * Once a player has attacked with all of his side's characters(or passed) the enemy then does the same thing
-	* for now the enemy will randomly select one of the player's characters( later we can add it to prioritize kills)
 
-* If the enemy's health is 0 you win
-* If all characters on your side are 0 you lose
+* If all enemies are defeated you win
+* If all allies are defeated you lose
 
 
 Code organization
@@ -23,23 +22,21 @@ Code organization
 	* Attack Power
 	* Health Points
 	* Counter attack power
+	* Dodge
+	* Hit
 	* Ally/Enemy
 	* Methods: attack(target)
+	* moveto(row,col)
 		
-
-
-This continues until one of the characters are dead{
 
 Phases:
 
-Select Char -> Select Target -> Attack if target is an enemy
+Select Char -> Select Target -> Move to Target -> Select Enemy -> Attack Enemy -> Enemy Turn -> Select Char
 
 * Every character is a <div></div> 
 * Create two pointers: PlayerChar and Target
 	* When a <div></div> is selected on click set PlayerChar to reference the corresponding div
 		* On the second onclick the player if the click is a valid target(has Ally: false) call attack(Target)
-		
-* Repeat for the enemy, however the pointers are randomly generated
 }
 
 
@@ -52,23 +49,23 @@ Possible movement: Flood-fill algorithm with map
 1. initialize the open set with the starting position
 2. While the open set is not empty
 	3. set curr to open[0] and move open[0] to the closed set
-	4. for all neighbors 
-		5. if travelmap[curr].stepsleft - basemap[neighbor] < 0:
-			continue
-			else if travelmap[curr].stepsleft - basemap[neighbor] == 0:
-				add neighbor to the closedset (the key:value pair will just be replaced if its already there) along with its new stepsleft and the path taken
-			else (if travelmap[curr].stepsleft - basemap[neighbor] > 0)
-				add neighbor to the openset along with its new stepsleft and the path taken
+	4. for all neighboring tiles
+	    5. Calculate how many steps are left if the neighbor is moved into
+		6. If we've already calculated this tile, only replace it in the travel map if it is a more optimal path
+			If we do not have enough steps to move into the tile put it in the closed set and move to the next neighbor
+			If we did have enough steps add that tile to the Open set
 
-6. the closedset are all possible tiles that can be reached
+7. The map contains the location and contains the path taken to that location
 
 
 Enemy AI:
 {
 	*Loop through the array containing the enemy object references
-	*The enemy knows the location of the player
+	*The enemy knows the location of the nearest player
 	*The enemy moves to the closest possible tile
 }
+
+
 
 * Player Turn:
 	* Select character	

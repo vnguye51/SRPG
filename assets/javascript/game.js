@@ -35,7 +35,6 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
 
     this.attack = function(target){
         //Attack logic
-
         //Initial attack animations(can probably turn this into a function)
         if(target.pos[0] == this.pos[0] - 1){
             $(this.ref).animate({bottom:'50px'},250)
@@ -54,7 +53,6 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
             $(this.ref).animate({right:'0px'},250)
         }
 
-
         var hitroll = Math.floor(Math.random()*100) 
         var enemyroll = Math.floor(Math.random()*100)
 
@@ -63,8 +61,7 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
             printMessage(this.name + ' attacks '+  target.name + ' dealing ' + this.ap + ' damage.')
             hitSound.play()
             target.hp = Math.max(target.hp-this.ap,0)
-            if (target.hp <= 0) {
-                
+            if (target.hp <= 0) { 
                 printMessage(this.name + ' deals a lethal blow to ' + target.name)
                 removeChar(target)
                 this.exp += target.giveexp
@@ -73,7 +70,6 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
                 } 
                 
                 if (target.ally == false){ //Ally  killed enemy
-
                     if (enemies.length == 0){
                         //All enemies defeated //Should make a victory() function
                         phase = 'Victory'
@@ -81,19 +77,15 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
                         printMessage("You have defeated all enemies!")
                     }
                 }
-
                 else{
                     allies.splice(allies.indexOf(target.ref),1)
                     if (allies.length == 0){
                         //All allies defeated //Should make a defeat() function
                         phase = 'GameOver'
                         printLabel('DEFEAT')
-                        printMessage("All allies have been slain.")
-                        
+                        printMessage("All allies have been slain.")      
                     }
                 }
-               
-                
             }
         }
 
@@ -101,8 +93,6 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
             //attack misses
             missSound.play()
             printMessage(this.name + ' attacks but ' + target.name + ' parries!')
-
-            
         }
 
         $(this.ref).promise().done(function(){
@@ -143,9 +133,7 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
                             printMessage("You have defeated all enemies!")
                         }
                     }
-    
                     else{
-    
                         if (enemies.length == 0){
                             phase = 'GameOver'
                             printLabel('DEFEAT')
@@ -160,22 +148,9 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
                 missSound.play()
                 printMessage(target.name + ' misses the riposte!')
             }
-   
-
-
-
             statupdate(target)
             statupdate(this.data())
-    
         })
-
-     
-
-       
-     
-
-        
-
     };
 
     this.moveto = function(targetrow,targetcol){ 
@@ -197,8 +172,6 @@ var levelUpSound = document.createElement('audio')
 levelUpSound.src = ('assets/SFX/LevelUp.wav')
 //////////////////
 
-
-
 var gamegrid = [] // I might use this
 //Create gamegrid
 for (var i = 0; i<10;i++){
@@ -217,14 +190,13 @@ for (var i = 0; i<10;i++){
     $('#container').append(rowref)
 }
 
-
 var player = null
 var target = null
 var phase = 'ChooseCharacter'
 
 
 //DEFINE CHARACTERS HERE
-var Red = new Character($('#red'),'Red',100,20,10,100,20,3,0,100,false, false, [8,1])
+var Red = new Character($('#red'),'Red',100,20,10,100,20,3,0,100,false, false, [9,1])
 var Green = new Character($('#green'),'Green',100,20,10,100,20,3,0,100,false, false, [1,8])
 var White = new Character($('#white'),'White',100,20,10,100,20,3,0,100,false, false, [0,0])
 var Black = new Character($('#black'),'Black',100,20,10,100,20,3,0,100,false, false, [0,1])
@@ -260,25 +232,6 @@ for (var i = 0; i < enemies.length;i++){
     enemies[i] = enemies[i].ref
 }
 
-//////////////////////////MOVEMENT LOGIC/////////////////////////
-var originalTileWeights =  [[[-1,-1],99],[[-1,0],99],[[-1,1],99],[[-1,2],99],[[-1,3],99],[[-1,4],99],[[-1,5],99],[[-1,6],99],[[-1,7],99],[[-1,8],99],[[-1,9],99],[[-1,10],99],
-                    [[0,-1],99],[[0,0],1],[[0,1],1],[[0,2],1],[[0,3],1],[[0,4],1],[[0,5],1],[[0,6],1],[[0,7],1],[[0,8],1],[[0,9],1],[[0,10],99],
-                    [[1,-1],99],[[1,0],1],[[1,1],1],[[1,2],1],[[1,3],1],[[1,4],1],[[1,5],1],[[1,6],1],[[1,7],3],[[1,8],1],[[1,9],1],[[1,10],99],
-                    [[2,-1],99],[[2,0],1],[[2,1],1],[[2,2],1],[[2,3],1],[[2,4],1],[[2,5],1],[[2,6],2],[[2,7],2],[[2,8],1],[[2,9],1],[[2,10],99],
-                    [[3,-1],99],[[3,0],1],[[3,1],1],[[3,2],1],[[3,3],1],[[3,4],1],[[3,5],3],[[3,6],1],[[3,7],1],[[3,8],1],[[3,9],1],[[3,10],99],
-                    [[4,-1],99],[[4,0],1],[[4,1],2],[[4,2],1],[[4,3],1],[[4,4],3],[[4,5],3],[[4,6],3],[[4,7],1],[[4,8],2],[[4,9],1],[[4,10],99],
-                    [[5,-1],99],[[5,0],1],[[5,1],1],[[5,2],1],[[5,3],2],[[5,4],3],[[5,5],2],[[5,6],3],[[5,7],1],[[5,8],1],[[5,9],1],[[5,10],99],
-                    [[6,-1],99],[[6,0],1],[[6,1],1],[[6,2],1],[[6,3],3],[[6,4],1],[[6,5],1],[[6,6],1],[[6,7],1],[[6,8],1],[[6,9],1],[[6,10],99],
-                    [[7,-1],99],[[7,0],1],[[7,1],1],[[7,2],1],[[7,3],2],[[7,4],1],[[7,5],1],[[7,6],1],[[7,7],1],[[7,8],1],[[7,9],1],[[7,10],99],
-                    [[8,-1],99],[[8,0],1],[[8,1],3],[[8,2],1],[[8,3],1],[[8,4],1],[[8,5],1],[[8,6],1],[[8,7],1],[[8,8],1],[[8,9],1],[[8,10],99],
-                    [[9,-1],99],[[9,0],2],[[9,1],1],[[9,2],1],[[9,3],1],[[9,4],1],[[9,5],1],[[9,6],1],[[9,7],1],[[9,8],1],[[9,9],1],[[9,10],99],
-                    [[10,-1],99],[[10,0],99],[[10,1],99],[[10,2],99],[[10,3],99],[[10,4],99],[[10,5],99],[[10,6],99],[[10,7],99],[[10,8],99],[[10,9],99],[[10,10],99],]
-
-var allymovemap = {} //Tileweights, Store the steps needed to move into a tile in a map
-var enemymovemap = {}
-
-
-
 function removeChar(char){
     //Remove char from game
     index = null
@@ -304,6 +257,26 @@ function removeChar(char){
     }
     $(char.ref).parent().empty()
 }
+
+//////////////////////////MOVEMENT LOGIC/////////////////////////
+var originalTileWeights =  [[[-1,-1],99],[[-1,0],99],[[-1,1],99],[[-1,2],99],[[-1,3],99],[[-1,4],99],[[-1,5],99],[[-1,6],99],[[-1,7],99],[[-1,8],99],[[-1,9],99],[[-1,10],99],
+                    [[0,-1],99],[[0,0],1],[[0,1],1],[[0,2],1],[[0,3],1],[[0,4],1],[[0,5],1],[[0,6],1],[[0,7],1],[[0,8],1],[[0,9],1],[[0,10],99],
+                    [[1,-1],99],[[1,0],1],[[1,1],1],[[1,2],1],[[1,3],1],[[1,4],1],[[1,5],1],[[1,6],1],[[1,7],3],[[1,8],1],[[1,9],1],[[1,10],99],
+                    [[2,-1],99],[[2,0],1],[[2,1],1],[[2,2],1],[[2,3],1],[[2,4],1],[[2,5],1],[[2,6],2],[[2,7],2],[[2,8],1],[[2,9],1],[[2,10],99],
+                    [[3,-1],99],[[3,0],1],[[3,1],1],[[3,2],1],[[3,3],1],[[3,4],1],[[3,5],3],[[3,6],1],[[3,7],1],[[3,8],1],[[3,9],1],[[3,10],99],
+                    [[4,-1],99],[[4,0],1],[[4,1],2],[[4,2],1],[[4,3],1],[[4,4],3],[[4,5],3],[[4,6],3],[[4,7],1],[[4,8],2],[[4,9],1],[[4,10],99],
+                    [[5,-1],99],[[5,0],1],[[5,1],1],[[5,2],1],[[5,3],2],[[5,4],3],[[5,5],2],[[5,6],3],[[5,7],1],[[5,8],1],[[5,9],1],[[5,10],99],
+                    [[6,-1],99],[[6,0],1],[[6,1],1],[[6,2],1],[[6,3],3],[[6,4],1],[[6,5],1],[[6,6],1],[[6,7],1],[[6,8],1],[[6,9],1],[[6,10],99],
+                    [[7,-1],99],[[7,0],1],[[7,1],1],[[7,2],1],[[7,3],2],[[7,4],1],[[7,5],1],[[7,6],1],[[7,7],1],[[7,8],1],[[7,9],1],[[7,10],99],
+                    [[8,-1],99],[[8,0],1],[[8,1],3],[[8,2],1],[[8,3],1],[[8,4],1],[[8,5],1],[[8,6],1],[[8,7],1],[[8,8],1],[[8,9],1],[[8,10],99],
+                    [[9,-1],99],[[9,0],2],[[9,1],1],[[9,2],1],[[9,3],1],[[9,4],1],[[9,5],1],[[9,6],1],[[9,7],1],[[9,8],1],[[9,9],1],[[9,10],99],
+                    [[10,-1],99],[[10,0],99],[[10,1],99],[[10,2],99],[[10,3],99],[[10,4],99],[[10,5],99],[[10,6],99],[[10,7],99],[[10,8],99],[[10,9],99],[[10,10],99],]
+
+var allymovemap = {} //Tileweights, Store the steps needed to move into a tile in a map
+var enemymovemap = {}
+
+
+
 //Use in between each turn. 
 function updateAllyTileWeights(){
     //Recreate original weightmap
@@ -334,42 +307,57 @@ function updateEnemyTileWeights(){
 updateAllyTileWeights()
 updateEnemyTileWeights()
 
-function findPath(start,mspd,map){ //Need to optimize to include shortest path. Works okay for now.
+function findPath(start,mspd,map){ 
+    //Flood fill algorithm to determine valid moves
     updateAllyTileWeights() 
+    //Create object Path that will eventually store the stepsLeft and a pathTaken to a tile
     function Path(stepsLeft,pathTaken){
         this.stepsLeft = stepsLeft;
         this.pathTaken = pathTaken;
     }
+    //Initialize a map that will store the Path to each tile
     var travelmap = {}
     travelmap[start] = new Path(mspd,[])
+
+    //Openset contains the queue of tiles to be looped through
     var openset = []
     openset.push(start)
     var closedset = []
     var n = 0
     
-    while ((openset.length) > 0 && (n < 100)){
+    while ((openset.length) > 0 && (n < 1000)){
+        //n < 1000 is just to make sure the loop doesn't go infinite, it is probably safe to remove
         n += 1
+
+        //set curr as the first element in the openset and put it in the closed set
         var curr = openset[0]
         openset.splice(0,1)
         closedset.push(curr)
         
-        
+        //Populate the neighboring tiles
         var neighbors = [[curr[0] + 1,curr[1]],[curr[0],curr[1]+1],[curr[0]-1,curr[1]],[curr[0],curr[1]-1] ]
         
+        //For every neighbor
         neighbors.forEach(function(neighbor){
+            //Calculate how many steps are left if the neighbor is moved into
             tentativeStepsLeft = travelmap[curr].stepsLeft - map[neighbor]
+            //If we've already calculated this tile, only replace it in the travel map if it requires less steps
             if (neighbor in travelmap){
                 if (tentativeStepsLeft > travelmap[neighbor].stepsLeft){
                     travelmap[neighbor].stepsLeft = tentativeStepsLeft
                 }
             }
+            //Otherwise if you do not have enough steps to move into neighbor do nothing
             else if (travelmap[curr].stepsLeft - map[neighbor] < 0){
             }
+            //If you have exactly enough steps push it to the closedset
             else if (travelmap[curr].stepsLeft - map[neighbor] == 0){
                 travelmap[neighbor] = new Path(travelmap[curr].stepsLeft - map[neighbor], travelmap[curr].pathTaken.concat(neighbor))
                 closedset.push(neighbor)
             }
             else{
+            //If the tile has not been previously calculated and it is possible to move into it with steps remaining
+            //Put that tile in the Open Set and log its Path in the map.
                 openset.push(neighbor)
                 travelmap[neighbor] = new Path(travelmap[curr].stepsLeft - map[neighbor], travelmap[curr].pathTaken.concat(neighbor))
             }
@@ -387,7 +375,7 @@ function showMoves(character){
     else{
         var possiblemoves = (findPath(character.pos,character.mspd,enemymovemap))
     }
-    
+    //Style all tiles that are part of the possible moves
     for (var key in possiblemoves){
         var correctedKey = key.slice(0,key.indexOf(',')) + '\\' + key.slice(key.indexOf(','))
         if (character.ally == false){
@@ -504,8 +492,9 @@ function indexOfa2Ina1(a1,a2){
         return N.toString() == a2.toString()
     }))
 }
+//////////////////////////////////
 
-
+//////////////ENEMY TURN FUNCTIONS//////////////
 function shortestPath(start,target){
     //This function used in enemy turn
     function reconstructPath(cameFrom,current,path){
@@ -514,7 +503,6 @@ function shortestPath(start,target){
             return reconstructPath(cameFrom,cameFrom[current],path)
         }
         return path
-
     }
 
     function estimate(start,target){
@@ -522,15 +510,14 @@ function shortestPath(start,target){
     }
 
     function findMinKey(keys){
+        //Find the key that corresponds to the smallest value
         var min = 999
         var minKey = null
-
         for (var i = 0; i<keys.length; i++){
             if (estimatedCost[keys[i]] < min){
                 min = estimatedCost[keys[i]]
                 minKey = keys[i]
-        }
-            
+            }
         }
         return minKey
     }
@@ -578,17 +565,10 @@ function shortestPath(start,target){
             }
             cameFrom[neighbor] = current
             startToPos[neighbor] = score
-            estimatedCost[neighbor] = startToPos[neighbor] + estimate(neighbor,target)
-            
+            estimatedCost[neighbor] = startToPos[neighbor] + estimate(neighbor,target)   
         })
     }
-    
-
-
-
 }
-
-
 
 function bestMove(enemy){
     var minDistance = 999
@@ -605,9 +585,6 @@ function bestMove(enemy){
                 if(enemies.every(function(enemy){return indexOfa2Ina1([enemy.data().pos],[path[j]]) == -1})){
                     lastTile = path[j]
                 }
-                
-
-
             }
         }
         if (stepsTaken < minDistance){
@@ -624,9 +601,6 @@ function bestMove(enemy){
     }
 }
 
-
-
-
 function enemyTurn(){
     //ENEMY TURN
     // printLabel('ENEMY PHASE')
@@ -634,7 +608,6 @@ function enemyTurn(){
         char.data().active = true
         $(char).find('img').attr('src','assets/images/Sprites/' + char.data().name + '.png')
     })
-
     updateEnemyTileWeights()
     enemies.forEach( function(enemy){
         bestMove(enemy.data())
@@ -645,10 +618,8 @@ function enemyTurn(){
 
 function allyTurn(){
     printLabel('PLAYER PHASE')
-    phase = 'ChooseCharacter'
-  
+    phase = 'ChooseCharacter' 
 }
-
 
 //////////////////ON CLICK///////////////
 ////CYCLES THROUGH PHASES 'ChooseCharacter' -> 'Move' -> 'Attack' 
