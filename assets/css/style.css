@@ -117,3 +117,7 @@ body{
     color: rgba(0, 0, 0, 0.795);
 
 }
+
+#instructions{
+    font-size:18px;
+}
