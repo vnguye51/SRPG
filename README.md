@@ -24,6 +24,11 @@ The inspiration for the project is based on the Fire Emblem and Advance Wars gam
 * If all enemies are defeated you win
 * If all allies are defeated you lose
 
+###Phases:
+
+Select Char -> Select Target -> Move to Target -> Select Enemy -> Attack Enemy -> Enemy Turn -> Select Char
+
+
 ## Flood Fill
 Movement:
 Possible movement: Flood-fill algorithm with map
@@ -61,11 +66,13 @@ Enemy Movement:
 
 ## Known Issues and things to implement:
 ### High Priority:
+
 * AI competes for the same spots. They are allowed to move through each other but if they cannot go to their target location they choose not to move.
 * The path is not recorded correctly for player movement, it is recorded correctly for enemy movement
 * Enemies will only attack if they START their turn adjacent to an ally
 
 ### Low Priority:
+* Hit sound does not play during a counterattack(but miss sound does)
 * The level up banner denies the mouse from hovering over tiles while it is shown
 * Forest tiles look a bit ugly
 * Transition tiles and more tiles of each type
@@ -73,3 +80,4 @@ Enemy Movement:
 * Level up info should be another div that temporarily covers the screen showing the stats that increased
 * Character portraits/emblems
 * SFX
++

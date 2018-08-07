@@ -1,11 +1,10 @@
-function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos) {
+function Character(ref,name,hp,ap,acc,dodge,mspd,exp,giveexp,ally,active,pos) {
     this.ref = ref;
     this.name = name;
     this.hp = hp;
     this.ap = ap;
-    this.cp = cp;
     this.acc = acc;
-    this.dodge = dodge;
+    this.dodge = dodge;//unused so far
     this.mspd = mspd;
     this.moves = null;
 
@@ -78,7 +77,6 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
                     }
                 }
                 else{
-                    allies.splice(allies.indexOf(target.ref),1)
                     if (allies.length == 0){
                         //All allies defeated //Should make a defeat() function
                         phase = 'GameOver'
@@ -118,10 +116,10 @@ function Character(ref,name,hp,ap,cp,acc,dodge,mspd,exp,giveexp,ally,active,pos)
             if ((target.acc > enemyroll) && (target.hp > 0)) {
                 //counterattack lands
                 hitSound.play()
-                this.data().hp = Math.max(this.data().hp-target.cp,0)
-                printMessage(target.name + ' lands the riposte dealing ' + target.cp + ' damage.')
+                this.data().hp = Math.max(this.data().hp-target.ap,0)
+                printMessage(target.name + ' lands the riposte dealing ' + target.ap + ' damage.')
                 if (this.data().hp <= 0) {
-                    printMessage(this.data().name + ' deals a lethal blow to ' + target.name)
+                    printMessage(target.name + ' deals a lethal blow to ' +this.data().name )
                     removeChar(this.data())
                     if (target.exp >= 100){
                         target.levelup()
@@ -196,20 +194,23 @@ var phase = 'ChooseCharacter'
 
 
 //DEFINE CHARACTERS HERE
-var Red = new Character($('#red'),'Red',100,20,10,100,20,3,0,100,false, false, [9,1])
-var Green = new Character($('#green'),'Green',100,20,10,100,20,3,0,100,false, false, [1,8])
-var White = new Character($('#white'),'White',100,20,10,100,20,3,0,100,false, false, [0,0])
-var Black = new Character($('#black'),'Black',100,20,10,100,20,3,0,100,false, false, [0,1])
-var Lucina = new Character($('#lucina'),'Lucina',100,20,10,100,20,3,0,100,false, false, [0,2])
-var Ryoma = new Character($('#ryoma'),'Ryoma',100,20,10,20,100,3,0,100,false, false,[1,1])
-var Hector = new Character($('#hector'),'Hector',100,20,20,100,20,3,0,100,false, false, [2,0])
-var Chamomile = new Character($('#chamomile'),'Chamomile',100,100,10,100,20,5,0,0,true, true, [8,8])
-var Earl = new Character($('#earl'),'Earl',100,100,10,0,100,5,0,0,true, true, [9,7])
-var Ceylon = new Character($('#ceylon'),'Ceylon',100,100,10,100,20,5,0,0,true, true, [7,9])
+//(ref,name,hp,ap,acc,dodge,mspd,exp,giveexp,ally,active,pos)
+var SpearSkeleton1 = new Character($('#spear1'),'Spear Skeleton 1',100,20,80,20,3,0,50,false, false, [9,1])
+var SpearSkeleton2 = new Character($('#spear2'),'Spear Skeleton 2',100,20,80,20,3,0,50,false, false, [1,8])
+var SpearSkeleton3 = new Character($('#spear3'),'Spear Skeleton 3',100,20,80,20,3,0,50,false, false, [0,2])
+var SwordSkeleton1 = new Character($('#sword1'),'Sword Skeleton 1',100,30,70,20,3,0,50,false, false, [0,1])
+var SwordSkeleton2 = new Character($('#sword2'),'Sword Skeleton 2',100,30,70,100,3,0,50,false, false,[1,1])
+var AxeSkeleton1 = new Character($('#axe1'),'Axe Skeleton 1',100,40,50,20,3,0,50,false, false, [0,0])
+var AxeSkeleton2 = new Character($('#axe2'),'Axe Skeleton 2',100,40,50,20,3,0,50,false, false, [2,0])
+
+
+var Chamomile = new Character($('#chamomile'),'Chamomile',100,40,90,20,4,0,0,true, true, [8,8])
+var Earl = new Character($('#earl'),'Earl',120,30,80,20,4,0,0,true, true, [9,7])
+var Ceylon = new Character($('#ceylon'),'Ceylon',200,70,50,20,4,0,0,true, true, [7,9])
 
 
 //CREATE ARRAYS FOR ENEMIES/ALLIES FOR GAME TO LOOP THROUGH
-var enemies = [Lucina, Ryoma, Hector,White,Black,Green,Red]
+var enemies = [SpearSkeleton1,SpearSkeleton2,SpearSkeleton3,SwordSkeleton1,SwordSkeleton2,AxeSkeleton1,AxeSkeleton2]
 var allies = [Chamomile,Earl,Ceylon]
 
 //Initialize position of allies and store their object reference in the tile
@@ -222,8 +223,7 @@ allies.forEach(function(char){
     char.ref.data(char)
     char.moveto(char.pos[0],char.pos[1])   
 })
-// allies = [$('#chamomile'),$('#earl'),$('#ceylon')]
-// enemies = [$('#lucina'),$('#ryoma'),$('#hector')]
+
 //Replace the allies variable with the jquery references after initialization
 for (var i = 0; i < allies.length;i++){
     allies[i] = allies[i].ref
@@ -233,16 +233,20 @@ for (var i = 0; i < enemies.length;i++){
 }
 
 function removeChar(char){
+    console.log('a')
     //Remove char from game
     index = null
     char.pos = [-50,-50]
     if (char.ally == true){
         //If ally
         for (var i = 0;i < allies.length;i++){
+            
             if (allies[i].data().name == char.name){
+                console.log(allies[i].data().name,char.name)
                 index = i     
             }
         }
+        console.log('b')
         allies.splice(index,1)
     }
     else{
@@ -551,18 +555,22 @@ function shortestPath(start,target){
 
         
         neighbors.forEach(function(neighbor){
+            //This tile is in the closed set so ignore it
             if (indexOfa2Ina1(closedSet,neighbor) != -1){
                 return
             }
 
+            //This is a new tile so queue the neighbors 
             var score = startToPos[current] + enemymovemap[neighbor]
             if (indexOfa2Ina1(openSet,neighbor) == -1){
                 openSet.push(neighbor)
             }
-
+            // Path is suboptimal so ignore it
             else if (score >= startToPos[neighbor]){
                 return
             }
+
+            //This is currently the optimal path so replace it in the map  
             cameFrom[neighbor] = current
             startToPos[neighbor] = score
             estimatedCost[neighbor] = startToPos[neighbor] + estimate(neighbor,target)   
@@ -590,7 +598,7 @@ function bestMove(enemy){
         if (stepsTaken < minDistance){
             minDistance = stepsTaken
             bestTile = lastTile
-            if ((Math.abs(targetPos[0] - enemy.pos[0])+Math.abs(targetPos[1] - enemy.pos[1])) <= 1){
+            if ((Math.abs(targetPos[0] - bestTile[0])+Math.abs(targetPos[1] - bestTile[1])) <= 1){
                 bestTarget = allies[i]
             }
         }
@@ -598,6 +606,10 @@ function bestMove(enemy){
     enemy.moveto(bestTile[0],bestTile[1])
     if (bestTarget != null){
         enemy.attack(bestTarget.data())
+        updateEnemyTileWeights()
+        updateAllyTileWeights()
+
+
     }
 }
 
