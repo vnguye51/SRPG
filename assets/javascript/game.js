@@ -195,13 +195,13 @@ var phase = 'ChooseCharacter'
 
 //DEFINE CHARACTERS HERE
 //(ref,name,hp,ap,acc,dodge,mspd,exp,giveexp,ally,active,pos)
-var SpearSkeleton1 = new Character($('#spear1'),'Spear Skeleton 1',100,20,80,20,3,0,50,false, false, [9,1])
-var SpearSkeleton2 = new Character($('#spear2'),'Spear Skeleton 2',100,20,80,20,3,0,50,false, false, [1,8])
-var SpearSkeleton3 = new Character($('#spear3'),'Spear Skeleton 3',100,20,80,20,3,0,50,false, false, [0,2])
-var SwordSkeleton1 = new Character($('#sword1'),'Sword Skeleton 1',100,30,70,20,3,0,50,false, false, [0,1])
-var SwordSkeleton2 = new Character($('#sword2'),'Sword Skeleton 2',100,30,70,100,3,0,50,false, false,[1,1])
-var AxeSkeleton1 = new Character($('#axe1'),'Axe Skeleton 1',100,40,50,20,3,0,50,false, false, [0,0])
-var AxeSkeleton2 = new Character($('#axe2'),'Axe Skeleton 2',100,40,50,20,3,0,50,false, false, [2,0])
+var SpearSkeleton1 = new Character($('#spear1'),'Spear Skeleton 1',100,20,80,20,4,0,50,false, false, [9,1])
+var SpearSkeleton2 = new Character($('#spear2'),'Spear Skeleton 2',100,20,80,20,4,0,50,false, false, [1,8])
+var SpearSkeleton3 = new Character($('#spear3'),'Spear Skeleton 3',100,20,80,20,4,0,50,false, false, [0,2])
+var SwordSkeleton1 = new Character($('#sword1'),'Sword Skeleton 1',100,30,70,20,4,0,50,false, false, [0,1])
+var SwordSkeleton2 = new Character($('#sword2'),'Sword Skeleton 2',100,30,70,100,4,0,50,false, false,[1,1])
+var AxeSkeleton1 = new Character($('#axe1'),'Axe Skeleton 1',100,40,50,20,4,0,50,false, false, [0,0])
+var AxeSkeleton2 = new Character($('#axe2'),'Axe Skeleton 2',100,40,50,20,4,0,50,false, false, [2,0])
 
 
 var Chamomile = new Character($('#chamomile'),'Chamomile',100,40,90,20,4,0,0,true, true, [8,8])

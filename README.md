@@ -70,7 +70,7 @@ Enemy Movement:
 * AI competes for the same spots. They are allowed to move through each other but if they cannot go to their target location they choose not to move.
 * The path is not recorded correctly for player movement, it is recorded correctly for enemy movement
 * Enemies will only attack if they START their turn adjacent to an ally
-
+* Enemies do not move into the last tile they are able to
 ### Low Priority:
 * Hit sound does not play during a counterattack(but miss sound does)
 * The level up banner denies the mouse from hovering over tiles while it is shown
