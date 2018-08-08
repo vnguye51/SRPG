@@ -134,7 +134,7 @@ function Character(ref,name,hp,ap,acc,dodge,mspd,exp,giveexp,ally,active,pos) {
                         }
                     }
                     else{
-                        if (enemies.length == 0){
+                        if (allies.length == 0){
                             phase = 'GameOver'
                             printLabel('DEFEAT')
                             printMessage("All allies have been slain.")
